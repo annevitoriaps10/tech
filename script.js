@@ -3,7 +3,7 @@
 const CFG = window.SUPABASE_CONFIG || {};
 const CONFIGURADO = !!(CFG.url && CFG.anonKey && !CFG.url.startsWith("COLE"));
 const sb = CONFIGURADO ? supabase.createClient(CFG.url, CFG.anonKey) : null;
-const { SERVICOS, STATUS, PAGAMENTO_STATUS, FORMAS, ETAPAS_LEAD, DISPOSITIVOS, TIPOS_SITE, ATENDIMENTO } = window.TE;
+const { SERVICOS, STATUS, PAGAMENTO_STATUS, FORMAS, ETAPAS_LEAD, DISPOSITIVOS, TIPOS_SITE, ATENDIMENTO, PRIORIDADES } = window.TE;
 const App = { session: null, perfil: null };
 
 /* ---------- utilidades ---------- */
@@ -37,6 +37,12 @@ document.addEventListener("change", e => { const b = e.target.closest("[data-chg
 /* ---------- Cabeçalho, rodapé e guarda de acesso ---------- */
 function desenharChrome() {
   const adm = App.perfil?.is_admin, logado = !!App.session, atual = location.pathname.split("/").pop() || "index.html";
+  if (adm) {
+    $("#site-header").innerHTML = `<div class="bar-in"><a class="logo" href="admin.html" aria-label="TechEmpire — painel"><i>TE</i><span>Tech<b>Empire</b></span></a>
+      <button class="menu" aria-expanded="false" aria-label="Abrir menu">☰</button><nav id="nav"><a href="admin.html" class="on">Painel de atendimento</a><button class="btn sm" data-act="sair">Sair</button></nav></div>`;
+    $(".menu").onclick = e => { const n = $("#nav").classList.toggle("open"); e.currentTarget.setAttribute("aria-expanded", n); };
+    $("#site-footer").innerHTML = `<div class="copy" style="margin:0 auto">© ${new Date().getFullYear()} TechEmpire · Painel administrativo</div>`; return;
+  }
   const l = (href, txt) => `<a href="${href}" class="${atual === href ? "on" : ""}">${txt}</a>`;
   $("#site-header").innerHTML = `<div class="bar-in"><a class="logo" href="index.html" aria-label="TechEmpire — início"><i>TE</i><span>Tech<b>Empire</b></span></a>
    <button class="menu" aria-expanded="false" aria-label="Abrir menu">☰</button>
@@ -61,6 +67,7 @@ async function boot() {
   }
   if ((need === "client" || need === "admin") && !App.session) { location.href = "login.html?next=" + encodeURIComponent(location.pathname.split("/").pop() + location.search); return; }
   if (need === "admin" && !App.perfil?.is_admin) { location.href = "painel.html"; return; }
+  if (need === "client" && App.perfil?.is_admin) { location.href = "admin.html"; return; }
   if (need === "guest" && App.session && !location.hash.includes("type=recovery")) { location.href = App.perfil?.is_admin ? "admin.html" : "painel.html"; return; }
   desenharChrome();
   const fn = Pages[document.body.dataset.page];
@@ -103,16 +110,16 @@ function iniciarChat(el, chamadoId, admin) {
     const perto = primeira || log.scrollHeight - log.scrollTop - log.clientHeight < 90;
     log.innerHTML = (data || []).map(m => { const r = nomes[m.remetente_id] || {}, eu = m.remetente_id === meu;
       const quem = eu ? "Você" : (r.is_admin ? "TechEmpire" : r.nome || "Cliente");
-      return `<div class="b ${eu ? "me" : "ou"} ${m.interno ? "int" : ""}"><small>${esc(quem)} · ${fmtData(m.criado_em)}${m.interno ? " · NOTA INTERNA" : ""}</small><div>${esc(m.conteudo)}</div></div>`; }).join("") || '<p class="empty">Nenhuma mensagem ainda. Mande a primeira!</p>';
+      return `<div class="b ${eu ? "me" : "ou"} ${m.interna ? "int" : ""}"><small>${esc(quem)} · ${fmtData(m.criado_em)}${m.interna ? " · NOTA INTERNA" : ""}</small><div>${esc(m.conteudo)}</div></div>`; }).join("") || '<p class="empty">Nenhuma mensagem ainda. Mande a primeira!</p>';
     if (perto) log.scrollTop = log.scrollHeight; primeira = false;
-    const nao = (data || []).filter(m => !m.lida && m.remetente_id !== meu && (admin || !m.interno)).map(m => m.id);
+    const nao = (data || []).filter(m => !m.lida && m.remetente_id !== meu && (admin || !m.interna)).map(m => m.id);
     if (nao.length) sb.from("mensagens").update({ lida: true }).in("id", nao).then(() => {});
     busy = false;
   }
   form.addEventListener("submit", async e => { e.preventDefault(); const t = form.t.value.trim(); const files = [...form.f.files]; if (!t && !files.length) return; ocupado(form, true);
     let falhas = 0; if (files.length) { falhas = await enviarArquivos(chamadoId, files); document.dispatchEvent(new CustomEvent("chat-arquivos")); }
     const texto = t || `📎 Enviou ${files.length - falhas} arquivo(s).`;
-    const { error } = await sb.from("mensagens").insert({ chamado_id: chamadoId, remetente_id: App.session.user.id, conteudo: texto, interno: admin ? !!form.int?.checked : false });
+    const { error } = await sb.from("mensagens").insert({ chamado_id: chamadoId, remetente_id: App.session.user.id, conteudo: texto, interna: admin ? !!form.int?.checked : false });
     ocupado(form, false); if (error) return toast("Não foi possível enviar a mensagem."); if (falhas) toast(falhas + " arquivo(s) não enviado(s) (máx. 50 MB)."); form.t.value = ""; form.f.value = ""; await carregar(); log.scrollTop = log.scrollHeight; });
   form.t.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
   sb.channel("chat-" + chamadoId).on("postgres_changes", { event: "INSERT", schema: "public", table: "mensagens", filter: `chamado_id=eq.${chamadoId}` }, carregar).subscribe();
@@ -150,6 +157,8 @@ Pages.criarConta = () => {
     e.preventDefault(); const f = e.target, d = Object.fromEntries(new FormData(f));
     if (Object.values(d).some(v => !v.trim())) return msg("m-conta", "Preencha todos os campos.");
     if (!cpfValido(d.cpf)) return msg("m-conta", "CPF inválido. Confira os números.");
+    if (digitos(d.telefone).length < 10) return msg("m-conta", "Informe um WhatsApp válido, com DDD.");
+    if (!/^[A-Za-z]{2}$/.test(d.estado.trim())) return msg("m-conta", "O estado deve ter 2 letras (ex.: ES).");
     if (d.senha.length < 8) return msg("m-conta", "A senha precisa ter pelo menos 8 caracteres.");
     if (d.senha !== d.senha2) return msg("m-conta", "As senhas não coincidem.");
     ocupado(f, true);
@@ -198,7 +207,7 @@ Pages.painel = async () => {
   const carregar = async () => {
     const { data, error } = await sb.from("chamados").select("id,numero,categoria,titulo,status,criado_em").eq("cliente_id", App.session.user.id).order("criado_em", { ascending: false });
     if (error) { $("#lista").innerHTML = '<p class="empty">Não foi possível carregar seus chamados.</p>'; return; }
-    const naoLidas = (await sb.from("mensagens").select("*", { count: "exact", head: true }).eq("lida", false).eq("interno", false).neq("remetente_id", App.session.user.id)).count ?? 0;
+    const naoLidas = (await sb.from("mensagens").select("*", { count: "exact", head: true }).eq("lida", false).eq("interna", false).neq("remetente_id", App.session.user.id)).count ?? 0;
     const abertos = data.filter(c => !["Concluída", "Cancelada"].includes(c.status)).length;
     $("#kpis").innerHTML = [[data.length, "Chamados"], [abertos, "Em aberto"], [data.length - abertos, "Finalizados"], [naoLidas, "Mensagens novas"]].map(([n, l]) => `<div class="k"><b>${n}</b><span>${l}</span></div>`).join("");
     $("#lista").innerHTML = data.length ? tabela(["Nº", "Serviço", "Título", "Status", "Data"], data.map(c => `<tr class="go" data-act="abrir" data-id="${c.id}"><td><a href="chamado.html?id=${c.id}">${num(c.numero)}</a></td><td>${c.categoria === "site" ? "Site" : "Manutenção"}</td><td>${esc(c.titulo)}</td><td>${pill(c.status)}</td><td>${fmtData(c.criado_em)}</td></tr>`))
@@ -265,25 +274,71 @@ Pages.perfil = () => {
 
 /* ---------- ADMIN: painel (início, chamados, clientes, leads, usuários) ---------- */
 Pages.admin = async () => {
+  const badge = n => n ? `<span class="pill" title="Mensagens não lidas">💬 ${n}</span>` : "";
+  async function carregarChamados(cli) { let q = sb.from("chamados").select("id,numero,cliente_id,categoria,titulo,status,prioridade,criado_em").order("criado_em", { ascending: false }).limit(500); if (cli) q = q.eq("cliente_id", cli); const { data, error } = await q; if (error) throw error; return comClientes(data || []); }
+  async function mapaNaoLidas() { const { data } = await sb.from("mensagens").select("chamado_id").eq("lida", false).eq("interna", false).neq("remetente_id", App.session.user.id); const m = {}; (data || []).forEach(x => m[x.chamado_id] = (m[x.chamado_id] || 0) + 1); return m; }
+  async function mapaPagamentos() { const { data } = await sb.from("pagamentos").select("chamado_id,status,valor,criado_em").order("criado_em"); const m = {}; (data || []).forEach(p => m[p.chamado_id] = p); return m; }
+  async function mudarStatus(id, de, para) { const { error } = await sb.from("chamados").update({ status: para, atualizado_em: new Date().toISOString() }).eq("id", id); if (!error) await sb.from("historico_status").insert({ chamado_id: id, status_anterior: de, status_novo: para, responsavel_id: App.session.user.id }); return !error; }
+  Chg.rapido = async (d, el) => { const ok = await mudarStatus(d.id, d.de, el.value); toast(ok ? "Status atualizado" : "Erro ao mudar o status"); rota(); };
   const Rotas = {
     async inicio() {
       const c = async (t, fn) => { let q = sb.from(t).select("*", { count: "exact", head: true }); if (fn) q = fn(q); return (await q).count ?? 0; };
-      const r = await Promise.all([c("usuarios", q => q.eq("is_admin", false)), c("chamados"), c("chamados", q => q.in("status", ["Nova chamada", "Aguardando análise"])), c("chamados", q => q.eq("status", "Em andamento")), c("chamados", q => q.eq("status", "Concluída")), c("chamados", q => q.eq("categoria", "site")), c("forleads"), c("pagamentos", q => q.in("status", ["Pendente", "Aguardando pagamento"])), c("pagamentos", q => q.eq("status", "Pago")), c("mensagens", q => q.eq("lida", false).eq("interno", false).neq("remetente_id", App.session.user.id))]);
+      const r = await Promise.all([c("usuarios", q => q.eq("is_admin", false)), c("chamados"), c("chamados", q => q.in("status", ["Nova chamada", "Aguardando análise"])), c("chamados", q => q.eq("status", "Em andamento")), c("chamados", q => q.eq("status", "Concluída")), c("chamados", q => q.eq("categoria", "site")), c("forleads"), c("pagamentos", q => q.in("status", ["Pendente", "Aguardando pagamento"])), c("pagamentos", q => q.eq("status", "Pago")), c("mensagens", q => q.eq("lida", false).eq("interna", false).neq("remetente_id", App.session.user.id))]);
       const L = ["Clientes", "Chamados", "Pendentes", "Em andamento", "Concluídos", "Projetos de site", "Leads", "Pagamentos pendentes", "Pagamentos confirmados", "Mensagens não lidas"];
-      $("#conteudo-admin").innerHTML = `<h2>Início</h2><div class="kpis">${r.map((n, i) => `<div class="k"><b>${n}</b><span>${L[i]}</span></div>`).join("")}</div>`;
+      const [lista, nl] = await Promise.all([carregarChamados(), mapaNaoLidas()]);
+      const link = c => `<a class="rowlink" href="admin-chamado.html?id=${c.id}"><span><b>${num(c.numero)}</b> · ${esc(c.titulo)}<small>${esc(c.cliente?.nome)} · ${fmtData(c.criado_em)}</small></span>${badge(nl[c.id])}</a>`;
+      const filaItem = c => `<div class="rowlink"><a href="admin-chamado.html?id=${c.id}" style="text-decoration:none;flex:1"><b>${num(c.numero)}</b> · ${esc(c.titulo)}<small>${esc(c.cliente?.nome)} · ${c.categoria === "site" ? "Site" : "Manutenção"} · ${fmtData(c.criado_em)}</small></a>${badge(nl[c.id])}<button class="btn primary sm" data-act="atender" data-id="${c.id}" data-de="${esc(c.status)}">Atender</button></div>`;
+      const fila = lista.filter(x => ["Nova chamada", "Aguardando análise", "Aprovada"].includes(x.status)).sort((a, b) => new Date(a.criado_em) - new Date(b.criado_em)).slice(0, 8), andamento = lista.filter(x => x.status === "Em andamento").slice(0, 8), comMsg = lista.filter(x => nl[x.id]).slice(0, 6);
+      const cont = Object.fromEntries(STATUS.map(s => [s, lista.filter(x => x.status === s).length])), mx = Math.max(1, ...Object.values(cont));
+      $("#conteudo-admin").innerHTML = `<h2>Início</h2><div class="kpis">${r.map((n, i) => `<div class="k"><b>${n}</b><span>${L[i]}</span></div>`).join("")}</div>
+      <div class="box"><h3>⚡ Fila de atendimento</h3><p class="sub" style="margin-bottom:12px">Do mais antigo para o mais novo. Clique em Atender para começar.</p>${fila.length ? fila.map(filaItem).join("") : '<p class="empty">Nenhum chamado esperando. Tudo em dia!</p>'}</div>
+      <div class="two"><div class="box"><h3>🔧 Em andamento</h3>${andamento.length ? andamento.map(link).join("") : '<p class="empty">Nenhum chamado em andamento.</p>'}</div>
+      <div class="box"><h3>💬 Mensagens não lidas</h3>${comMsg.length ? comMsg.map(link).join("") : '<p class="empty">Nenhuma mensagem nova.</p>'}</div></div>
+      <div class="box"><h3>Chamados por status</h3>${STATUS.map(s => `<div class="barra"><span>${esc(s)}</span><div><i style="width:${cont[s] / mx * 100}%"></i></div><b>${cont[s]}</b></div>`).join("")}</div>`;
     },
     async chamados(param) {
-      const cli = new URLSearchParams(param || "").get("c");
-      $("#conteudo-admin").innerHTML = `<h2>Chamados</h2><div class="bar"><input id="bq" placeholder="Buscar título ou nº"><select id="bs"><option value="">Todos os status</option>${opts(STATUS)}</select><select id="bc"><option value="">Todas as categorias</option><option value="manutencao">Manutenção</option><option value="site">Site</option></select><select id="bo"><option value="desc">Mais recentes</option><option value="asc">Mais antigos</option></select></div><div id="tb"></div>`;
-      const carregar = async () => {
-        let q = sb.from("chamados").select("id,numero,cliente_id,categoria,titulo,status,criado_em").order("criado_em", { ascending: $("#bo").value === "asc" });
-        if (cli) q = q.eq("cliente_id", cli); if ($("#bs").value) q = q.eq("status", $("#bs").value); if ($("#bc").value) q = q.eq("categoria", $("#bc").value);
-        const t = $("#bq").value.trim().replace(/[,()%]/g, " "); if (t) { const n = parseInt(t.replace(/\D/g, ""), 10); q = q.or(Number.isFinite(n) && /\d/.test(t) ? `titulo.ilike.%${t}%,numero.eq.${n}` : `titulo.ilike.%${t}%`); }
-        const { data, error } = await q; if (error) return $("#tb").innerHTML = '<p class="empty">Erro ao carregar.</p>';
-        const L = await comClientes(data);
-        $("#tb").innerHTML = tabela(["Nº", "Cliente", "Serviço", "Título", "Status", "Data"], L.map(c => `<tr class="go" data-act="abrirAdm" data-id="${c.id}"><td><a href="admin-chamado.html?id=${c.id}">${num(c.numero)}</a></td><td>${esc(c.cliente?.nome)}</td><td>${c.categoria === "site" ? "Site" : "Manutenção"}</td><td>${esc(c.titulo)}</td><td>${pill(c.status)}</td><td>${fmtData(c.criado_em)}</td></tr>`));
+      const cli = new URLSearchParams(param || "").get("c"); let modo = Rotas._modo || "lista", chip = "";
+      const [todos, nl, pg] = await Promise.all([carregarChamados(cli), mapaNaoLidas(), mapaPagamentos()]);
+      $("#conteudo-admin").innerHTML = `<div class="row" style="justify-content:space-between;margin-bottom:12px"><h2 style="margin:0">Chamados${cli ? " do cliente" : ""}</h2><div class="row"><button class="btn sm" data-act="modo" data-m="lista">☰ Lista</button><button class="btn sm" data-act="modo" data-m="quadro">▦ Quadro</button></div></div>
+        <div class="chips" id="chips"></div>
+        <div class="bar"><input id="bq" placeholder="Buscar por título, nº ou cliente"><select id="bc"><option value="">Todas as categorias</option><option value="manutencao">Manutenção</option><option value="site">Site</option></select><select id="bp"><option value="">Qualquer prioridade</option>${opts(PRIORIDADES)}</select><select id="bo"><option value="desc">Mais recentes</option><option value="asc">Mais antigos</option></select></div><div id="tb"></div>`;
+      const desenhar = () => {
+        const q = $("#bq").value.trim().toLowerCase(), cat = $("#bc").value, pr = $("#bp").value, asc = $("#bo").value === "asc";
+        let l = todos.filter(c => (!cat || c.categoria === cat) && (!pr || c.prioridade === pr) && (!q || `${c.titulo} ${num(c.numero)} ${c.numero} ${c.cliente?.nome || ""}`.toLowerCase().includes(q)));
+        const cont = {}; l.forEach(c => cont[c.status] = (cont[c.status] || 0) + 1);
+        $("#chips").innerHTML = `<button class="chip ${!chip ? "on" : ""}" data-act="chip" data-s="">Todos <b>${l.length}</b></button>` + STATUS.map(s => `<button class="chip ${chip === s ? "on" : ""}" data-act="chip" data-s="${esc(s)}">${esc(s)} <b>${cont[s] || 0}</b></button>`).join("");
+        $$("[data-act=modo]").forEach(b => b.classList.toggle("primary", b.dataset.m === modo));
+        if (modo === "lista") {
+          if (chip) l = l.filter(c => c.status === chip); l.sort((a, b) => asc ? new Date(a.criado_em) - new Date(b.criado_em) : new Date(b.criado_em) - new Date(a.criado_em));
+          $("#tb").innerHTML = tabela(["Nº", "Cliente", "Serviço", "Título", "Prioridade", "Status", "Pagamento", "", "Data", ""], l.map(c => `<tr><td><a href="admin-chamado.html?id=${c.id}">${num(c.numero)}</a></td><td>${esc(c.cliente?.nome)}</td><td>${c.categoria === "site" ? "Site" : "Manutenção"}</td><td><a href="admin-chamado.html?id=${c.id}">${esc(c.titulo)}</a></td><td>${c.prioridade ? pill(c.prioridade, true) : "—"}</td><td><select class="mini" data-chg="rapido" data-id="${c.id}" data-de="${esc(c.status)}" aria-label="Alterar status">${opts(STATUS, c.status)}</select></td><td>${pg[c.id] ? pill(pg[c.id].status, true) : "—"}</td><td>${badge(nl[c.id])}</td><td>${fmtData(c.criado_em)}</td><td>${["Nova chamada", "Aguardando análise", "Aprovada"].includes(c.status) ? `<button class="btn primary sm" data-act="atender" data-id="${c.id}" data-de="${esc(c.status)}">Atender</button>` : ""}</td></tr>`));
+        } else {
+          l.sort((a, b) => new Date(b.criado_em) - new Date(a.criado_em));
+          $("#tb").innerHTML = `<p class="sub">Arraste os cartões entre as colunas para mudar o status (no celular, use a Lista).</p><div class="kanban">${STATUS.map(s => { const col = l.filter(c => c.status === s);
+            return `<div class="col" data-s="${esc(s)}"><h4>${esc(s)} <span class="pill gray">${col.length}</span></h4>${col.map(c => `<div class="kc" draggable="true" data-id="${c.id}" data-de="${esc(s)}"><a href="admin-chamado.html?id=${c.id}"><b>${num(c.numero)}</b></a> ${badge(nl[c.id])}${c.prioridade ? " " + pill(c.prioridade, true) : ""}<div>${esc(c.titulo)}</div><small>${esc(c.cliente?.nome)} · ${c.categoria === "site" ? "Site" : "Manutenção"} · ${new Date(c.criado_em).toLocaleDateString("pt-BR")}</small></div>`).join("") || '<p class="empty" style="padding:6px">Vazio</p>'}</div>`; }).join("")}</div>`;
+          $$(".kc").forEach(k => k.addEventListener("dragstart", e => e.dataTransfer.setData("text/plain", JSON.stringify({ id: k.dataset.id, de: k.dataset.de }))));
+          $$(".col").forEach(col => { col.addEventListener("dragover", e => { e.preventDefault(); col.classList.add("over"); }); col.addEventListener("dragleave", () => col.classList.remove("over"));
+            col.addEventListener("drop", async e => { e.preventDefault(); col.classList.remove("over"); let d; try { d = JSON.parse(e.dataTransfer.getData("text/plain")); } catch { return; }
+              if (d.de === col.dataset.s) return; const ok = await mudarStatus(d.id, d.de, col.dataset.s); toast(ok ? "Status atualizado" : "Erro ao mudar o status"); Rotas.chamados(param); }); });
+        }
       };
-      ["bq", "bs", "bc", "bo"].forEach(i => $("#" + i).oninput = carregar); carregar();
+      Act.modo = d => { modo = d.m; Rotas._modo = modo; desenhar(); }; Act.chip = d => { chip = d.s; desenhar(); };
+      ["bq", "bc", "bp", "bo"].forEach(i => $("#" + i).oninput = desenhar); desenhar();
+    },
+    async mensagens() {
+      const me = App.session.user.id; const { data: ms } = await sb.from("mensagens").select("chamado_id,remetente_id,conteudo,lida,interna,criado_em").order("criado_em", { ascending: false }).limit(400);
+      const g = {}; (ms || []).forEach(m => { const x = g[m.chamado_id] = g[m.chamado_id] || { ultima: m, nl: 0 }; if (!m.lida && !m.interna && m.remetente_id !== me) x.nl++; });
+      const ids = Object.keys(g); const { data: chs } = ids.length ? await sb.from("chamados").select("id,numero,titulo,cliente_id").in("id", ids) : { data: [] };
+      const L = (await comClientes(chs || [])).sort((a, b) => (g[b.id].nl - g[a.id].nl) || (new Date(g[b.id].ultima.criado_em) - new Date(g[a.id].ultima.criado_em)));
+      $("#conteudo-admin").innerHTML = `<h2>Mensagens</h2><p class="sub">Conversas com clientes. As não lidas aparecem primeiro.</p>` + (L.length ? L.map(c => { const x = g[c.id]; return `<a class="rowlink" href="admin-chamado.html?id=${c.id}"><span><b>${num(c.numero)}</b> · ${esc(c.titulo)}<small>${esc(c.cliente?.nome)} · ${fmtData(x.ultima.criado_em)}</small><small>${x.ultima.interna ? "Nota interna: " : ""}${esc(String(x.ultima.conteudo).slice(0, 110))}</small></span>${badge(x.nl)}</a>`; }).join("") : '<p class="empty">Nenhuma conversa ainda.</p>');
+    },
+    async pagamentos() {
+      const { data } = await sb.from("pagamentos").select("*").order("criado_em", { ascending: false }).limit(300);
+      const ids = [...new Set((data || []).map(p => p.chamado_id))]; const { data: chs } = ids.length ? await sb.from("chamados").select("id,numero,cliente_id").in("id", ids) : { data: [] };
+      const cm = Object.fromEntries((await comClientes(chs || [])).map(c => [c.id, c])); const soma = f => (data || []).filter(f).reduce((t, p) => t + Number(p.valor || 0), 0);
+      $("#conteudo-admin").innerHTML = `<h2>Pagamentos</h2><div class="kpis"><div class="k"><b>${brl(soma(p => p.status === "Pago"))}</b><span>Recebido</span></div><div class="k"><b>${brl(soma(p => ["Pendente", "Aguardando pagamento"].includes(p.status)))}</b><span>A receber</span></div><div class="k"><b>${brl(soma(p => p.status === "Parcialmente pago"))}</b><span>Parcialmente pago</span></div></div>
+      <div class="bar"><select id="pf"><option value="">Todos os status</option>${opts(PAGAMENTO_STATUS)}</select></div><div id="tb"></div>`;
+      const d = () => { const f = $("#pf").value; $("#tb").innerHTML = tabela(["Chamado", "Cliente", "Valor", "Forma", "Status", "Origem", "Data"], (data || []).filter(p => !f || p.status === f).map(p => { const c = cm[p.chamado_id] || {}; return `<tr><td><a href="admin-chamado.html?id=${p.chamado_id}">${c.numero ? num(c.numero) : "—"}</a></td><td>${esc(c.cliente?.nome)}</td><td>${brl(p.valor)}</td><td>${esc(p.forma)}</td><td>${pill(p.status)}</td><td>${p.manual ? "Registro manual" : "Online"}</td><td>${fmtData(p.pago_em || p.criado_em)}</td></tr>`; })); };
+      $("#pf").oninput = d; d();
     },
     async clientes() {
       $("#conteudo-admin").innerHTML = `<h2>Clientes</h2><div class="bar"><input id="bq" placeholder="Nome, CPF, telefone ou e-mail"></div><div id="ed"></div><div id="tb"></div>`;
@@ -309,6 +364,9 @@ Pages.admin = async () => {
       <div class="box" style="margin-top:16px"><h3>Promover cliente a administrador</h3><div class="bar"><input id="ae" type="email" placeholder="E-mail de um cliente já cadastrado"><button class="btn primary" data-act="promover">Promover</button></div></div>`;
     }
   };
+  Act.atender = async d => { const t = new Date().toISOString(); const { error } = await sb.from("chamados").update({ status: "Em andamento", assumido_em: t, admin_id: App.session.user.id, atualizado_em: t }).eq("id", d.id);
+    if (error) return toast("Não foi possível iniciar o atendimento.");
+    await sb.from("historico_status").insert({ chamado_id: d.id, status_anterior: d.de, status_novo: "Em andamento", responsavel_id: App.session.user.id }); location.href = "admin-chamado.html?id=" + d.id; };
   Act.abrirAdm = d => location.href = "admin-chamado.html?id=" + d.id;
   Act.editarCli = d => { const u = Rotas._clientes.find(x => x.id === d.id); $("#ed").innerHTML = `<form class="box" id="f-ed"><h3>Editar cliente</h3><div class="two"><label>Nome<input name="nome" value="${esc(u.nome)}" required></label><label>Telefone<input name="telefone" value="${esc(u.telefone)}"></label></div><div class="row"><button class="btn primary" type="submit">Salvar</button><button class="btn" type="button" data-act="cancelarEd">Cancelar</button></div></form>`;
     $("#f-ed").addEventListener("submit", async e => { e.preventDefault(); const f = e.target; const { error } = await sb.from("usuarios").update({ nome: f.nome.value.trim(), telefone: digitos(f.telefone.value) }).eq("id", d.id); toast(error ? "Erro ao salvar" : "Cliente atualizado"); $("#ed").innerHTML = ""; Rotas._recarregar(); }); };
@@ -326,7 +384,7 @@ Pages.admin = async () => {
     try { await Rotas[nome](param); } catch (e) { $("#conteudo-admin").innerHTML = '<p class="empty">Erro ao carregar.</p>'; } }
   window.addEventListener("hashchange", rota); rota();
   sb.channel("chamados-live").on("postgres_changes", { event: "*", schema: "public", table: "chamados" }, () => { toast("Chamados atualizados"); const p = location.hash.replace("#/", ""); if (!p || p.startsWith("chamados")) rota(); }).subscribe();
-  sb.channel("msgs-live").on("postgres_changes", { event: "INSERT", schema: "public", table: "mensagens" }, p => { if (p.new.remetente_id !== App.session.user.id && !p.new.interno) { toast("💬 Nova mensagem de cliente"); if (!location.hash.replace("#/", "")) rota(); } }).subscribe();
+  sb.channel("msgs-live").on("postgres_changes", { event: "INSERT", schema: "public", table: "mensagens" }, p => { if (p.new.remetente_id !== App.session.user.id && !p.new.interna) { toast("💬 Nova mensagem de cliente"); if (!location.hash.replace("#/", "")) rota(); } }).subscribe();
   setInterval(() => { if (!location.hash.replace("#/", "")) rota(); }, 60000);
 };
 
@@ -338,9 +396,9 @@ Pages.adminChamado = async () => {
   const u = (await sb.from("usuarios").select("nome,email,telefone,cpf,endereco").eq("id", c.cliente_id).maybeSingle()).data || {};
   const fim = c.status === "Concluída";
   $("#conteudo").innerHTML = `<p><a href="admin.html#/chamados">← Chamados</a></p><h2>${num(c.numero)} · ${esc(c.titulo)}</h2>
-  <div class="box"><h3>Cliente</h3>${esc(u.nome)} · ${esc(u.email)} · ${esc(u.telefone)}<br>CPF ${esc(u.cpf)}<br>${u.endereco ? esc(Object.values(u.endereco).join(", ")) : ""}</div>
+  <div class="box"><h3>Cliente</h3>${esc(u.nome)} · ${esc(u.email)} · ${esc(u.telefone)}<br>CPF ${esc(u.cpf)}<br>${u.endereco ? esc(Object.values(u.endereco).join(", ")) : ""}<p class="row" style="margin-top:10px"><a class="btn sm" href="admin.html#/chamados?c=${c.cliente_id}">Todos os chamados deste cliente</a>${digitos(u.telefone).length >= 10 ? `<a class="btn sm" target="_blank" rel="noopener" href="https://wa.me/${digitos(u.telefone).length <= 11 ? "55" : ""}${digitos(u.telefone)}">WhatsApp</a>` : ""}</p></div>
   <div class="box"><h3>Solicitação</h3><p style="white-space:pre-wrap">${esc(c.descricao)}</p><p>Criado: ${fmtData(c.criado_em)} · Início: ${fmtData(c.assumido_em)} · Conclusão: ${fmtData(c.concluido_em)}</p>
-  <label style="max-width:360px">Status<select id="st">${opts(STATUS, c.status)}</select></label>
+  <div class="two" style="max-width:560px"><label>Status<select id="st">${opts(STATUS, c.status)}</select></label><label>Prioridade<select id="pri"><option value="">—</option>${opts(PRIORIDADES, c.prioridade)}</select></label></div>
   <div class="row" style="margin-top:12px">${!c.assumido_em && !fim ? '<button class="btn primary" data-act="iniciar">Iniciar atendimento</button>' : ""}<button class="btn" data-act="salvar">Salvar</button>${fim ? "" : '<button class="btn primary" data-act="concluir">Concluir chamada</button>'}<button class="btn danger" data-act="excluir">Excluir</button></div><div class="msg" id="m-top"></div></div>
   <div class="box"><h3>${m ? "Execução técnica" : "Projeto do site"}</h3>
   ${m ? `<p>${esc(dt.tipo_dispositivo)} ${esc(dt.marca)} ${esc(dt.modelo)}</p><label>Diagnóstico técnico<textarea id="dg">${esc(dt.diagnostico)}</textarea></label><label>Solução aplicada / resumo do serviço (visível ao cliente ao concluir)<textarea id="sl">${esc(dt.solucao)}</textarea></label>`
@@ -354,6 +412,7 @@ Pages.adminChamado = async () => {
   async function salvar(extra = {}) {
     const novo = extra.status || $("#st").value; let e = (await sb.from("chamados").update({ status: novo, atualizado_em: new Date().toISOString(), ...extra }).eq("id", id)).error;
     if (!e && novo !== c.status) { await sb.from("historico_status").insert({ chamado_id: id, status_anterior: c.status, status_novo: novo, responsavel_id: App.session.user.id }); c.status = novo; }
+    const np = $("#pri").value || null; if (!e && np !== (c.prioridade || null)) { const e3 = (await sb.from("chamados").update({ prioridade: np }).eq("id", id)).error; if (e3) toast("Prioridade não salva (valor não aceito pelo banco)."); else c.prioridade = np; }
     if (!e) e = (await sb.from(m ? "detalhes_manutencao" : "detalhes_projetos").update(m ? { diagnostico: $("#dg").value, solucao: $("#sl").value } : { proposta: $("#sl").value, prazo_estimado: $("#pe").value }).eq("chamado_id", id)).error;
     return e;
   }
