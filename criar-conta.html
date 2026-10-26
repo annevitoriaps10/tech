@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Criar conta — TechEmpire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="criarConta" data-auth="guest">
+<header id="site-header"></header>
+<main class="wrap-main">
+<div class="panel"><h2>Criar conta</h2><p class="sub">Você precisa de uma conta para abrir chamados.</p>
+<form id="f-conta" novalidate>
+  <label>Nome completo<input name="nome" required autocomplete="name"></label>
+  <div class="two"><label>CPF<input name="cpf" required inputmode="numeric" placeholder="000.000.000-00"></label><label>WhatsApp<input name="telefone" required inputmode="tel" autocomplete="tel"></label></div>
+  <div class="two"><label>Rua<input name="rua" required autocomplete="address-line1"></label><label>Número<input name="numero" required></label></div>
+  <div class="two"><label>Bairro<input name="bairro" required></label><label>Cidade<input name="cidade" required></label></div>
+  <label>Estado (UF)<input name="estado" required maxlength="2" placeholder="ES"></label>
+  <label>E-mail<input name="email" type="email" required autocomplete="email"></label>
+  <div class="two"><label>Senha (mín. 8)<input name="senha" type="password" minlength="8" required autocomplete="new-password"></label><label>Confirmar senha<input name="senha2" type="password" minlength="8" required autocomplete="new-password"></label></div>
+  <div class="msg" id="m-conta" role="alert"></div>
+  <button class="btn primary" type="submit">Criar conta</button>
+  <p class="sub" style="margin:0">Já tem conta? <a href="login.html">Entrar</a>. Usamos seus dados só para prestar o serviço (LGPD).</p>
+</form></div>
+</main>
+<footer id="site-footer"></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
+<script src="data.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Novo chamado — TechEmpire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="novoChamado" data-auth="client">
+<header id="site-header"></header>
+<main class="wrap-main">
+<div class="panel wide"><h2>Novo chamado</h2><p class="sub">Escolha o tipo de atendimento.</p>
+<div class="tabs"><button type="button" class="btn sm" data-act="tipo" data-tipo="manutencao">Manutenção de dispositivo</button><button type="button" class="btn sm" data-act="tipo" data-tipo="site">Criação de site</button></div>
+
+<form id="f-manutencao" novalidate>
+  <div class="two"><label>Tipo de dispositivo<select name="tipo_dispositivo" id="sel-disp" required></select></label><label>Marca<input name="marca"></label></div>
+  <label>Modelo<input name="modelo"></label>
+  <label>Título curto do problema<input name="titulo" required maxlength="120" placeholder="Ex.: Notebook não liga"></label>
+  <label>Descrição detalhada do problema<textarea name="descricao" required></textarea></label>
+  <label>Sintomas e informações adicionais<textarea name="extras"></textarea></label>
+  <div class="two"><label>Tipo de atendimento<select name="atendimento" id="sel-atend"></select></label><label>Forma de pagamento desejada<select name="pagamento" class="sel-pag"></select></label></div>
+  <label>Fotos ou arquivos do defeito (até 50 MB cada)<input type="file" multiple accept="image/*,video/*,.pdf,.txt"></label>
+  <div class="msg" id="m-manutencao" role="alert"></div>
+  <button class="btn primary" type="submit">Enviar chamado</button>
+</form>
+
+<form id="f-site" hidden novalidate>
+  <div class="two"><label>Nome do site/projeto<input name="nome_projeto" required></label><label>Tipo de site<select name="tipo_site" id="sel-tsite" required></select></label></div>
+  <label>Empresa ou marca (se houver)<input name="empresa"></label>
+  <label>Descrição do negócio ou projeto<textarea name="descricao" required></textarea></label>
+  <label>Objetivo principal<input name="objetivo" required></label>
+  <label>Funcionalidades desejadas<textarea name="funcionalidades"></textarea></label>
+  <div class="two"><label>Estilo visual<input name="estilo_visual"></label><label>Cores preferidas<input name="cores"></label></div>
+  <label>Referências (links de sites)<input name="referencias"></label>
+  <div class="two"><label>Prazo desejado<input name="prazo" placeholder="Ex.: 30 dias"></label><label>Orçamento estimado (R$)<input name="orcamento" type="number" min="0" step="0.01"></label></div>
+  <label>Forma de pagamento desejada<select name="pagamento" class="sel-pag"></select></label>
+  <p class="sub" style="margin:0">Seu pedido vai para análise e você recebe o orçamento antes de qualquer cobrança.</p>
+  <div class="msg" id="m-site" role="alert"></div>
+  <button class="btn primary" type="submit">Enviar para análise</button>
+</form></div>
+</main>
+<footer id="site-footer"></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
+<script src="data.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

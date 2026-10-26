@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meu painel — TechEmpire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="painel" data-auth="client">
+<header id="site-header"></header>
+<main class="wrap-main">
+<h2>Meus chamados</h2><p class="sub" id="ola"></p>
+<div class="kpis" id="kpis"></div>
+<div class="row" style="margin-bottom:18px"><a class="btn primary sm" href="novo-chamado.html?tipo=manutencao">+ Solicitar manutenção</a><a class="btn sm" href="novo-chamado.html?tipo=site">+ Solicitar site</a></div>
+<div id="lista"><p class="empty">Carregando…</p></div>
+</main>
+<footer id="site-footer"></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
+<script src="data.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

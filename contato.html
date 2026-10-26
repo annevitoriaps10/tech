@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contato — TechEmpire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="contato" data-auth="public">
+<header id="site-header"></header>
+<main class="wrap-main">
+<div class="panel"><h2>Contato</h2><p class="sub">Conte o que você precisa e retornamos em breve.</p>
+<form id="f-contato" novalidate>
+  <label>Nome<input name="nome" required autocomplete="name"></label>
+  <div class="two"><label>E-mail<input name="email" type="email" autocomplete="email"></label><label>WhatsApp<input name="telefone" inputmode="tel" autocomplete="tel"></label></div>
+  <label>Serviço de interesse<select name="servico"><option value="">Selecione</option><option>Manutenção de computador</option><option>Assistência de celular</option><option>Suporte técnico</option><option>Criação de site</option><option>Outro</option></select></label>
+  <label>Mensagem<textarea name="mensagem" required></textarea></label>
+  <div class="msg" id="m-contato" role="alert"></div>
+  <button class="btn primary" type="submit">Enviar mensagem</button>
+</form></div>
+</main>
+<footer id="site-footer"></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
+<script src="data.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

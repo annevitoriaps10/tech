@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recuperar senha — TechEmpire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="recuperar" data-auth="guest">
+<header id="site-header"></header>
+<main class="wrap-main">
+<div class="panel"><h2>Recuperar senha</h2><p class="sub">Informe seu e-mail para receber o link de redefinição.</p>
+<form id="f-recuperar"><label>E-mail<input name="email" type="email" required></label><div class="msg" id="m-recuperar" role="alert"></div><button class="btn primary" type="submit">Enviar link</button><p class="sub" style="margin:0"><a href="login.html">Voltar ao login</a></p></form>
+<form id="f-nova" hidden><h3>Criar nova senha</h3><label>Nova senha (mín. 8)<input name="senha" type="password" minlength="8" required autocomplete="new-password"></label><label>Confirmar<input name="senha2" type="password" minlength="8" required autocomplete="new-password"></label><div class="msg" id="m-nova" role="alert"></div><button class="btn primary" type="submit">Salvar nova senha</button></form></div>
+</main>
+<footer id="site-footer"></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
+<script src="data.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

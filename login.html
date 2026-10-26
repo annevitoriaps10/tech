@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entrar — TechEmpire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="login" data-auth="guest">
+<header id="site-header"></header>
+<main class="wrap-main">
+<div class="panel"><h2>Entrar</h2><p class="sub">Acesse sua conta para acompanhar seus chamados.</p>
+<form id="f-login">
+  <label>E-mail<input name="email" type="email" required autocomplete="email"></label>
+  <label>Senha<input name="senha" type="password" required autocomplete="current-password"></label>
+  <div class="msg" id="m-login" role="alert"></div>
+  <button class="btn primary" type="submit">Entrar</button>
+  <p class="sub" style="margin:0"><a href="recuperar-senha.html">Esqueci minha senha</a> · <a href="criar-conta.html">Criar conta</a></p>
+</form></div>
+</main>
+<footer id="site-footer"></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
+<script src="data.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
