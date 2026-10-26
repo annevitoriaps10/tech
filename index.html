@@ -3,22 +3,49 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#07090b">
 <title>Tecnologia que funciona — TechEmpire</title>
+<meta name="description" content="Manutenção de computadores, suporte técnico e criação de sites. Abra chamados e converse com a TechEmpire online.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body data-page="home" data-auth="public">
 <header id="site-header"></header>
 <main class="wrap-main">
 <section class="hero">
-  <span class="badge">EMPRESA JÚNIOR DE TI</span>
-  <h1>Tecnologia que<br><em>funciona.</em></h1>
-  <p class="lead">Manutenção de computadores, suporte técnico e criação de sites com preço justo. Acompanhe seus chamados online.</p>
-  <div class="row" style="margin-top:28px"><a class="btn primary" href="criar-conta.html">Criar minha conta</a><a class="btn" href="servicos.html">Ver serviços</a></div>
+  <div>
+    <span class="badge">Empresa júnior de TI</span>
+    <h1>Tecnologia que <em>funciona.</em></h1>
+    <p class="lead">Manutenção de computadores, suporte técnico e criação de sites com preço justo. Abra um chamado, converse com a gente pelo site e acompanhe cada etapa.</p>
+    <div class="row" style="margin-top:30px"><a class="btn primary" href="criar-conta.html">Criar minha conta →</a><a class="btn" href="servicos.html">Ver serviços</a></div>
+  </div>
+  <div class="mock" aria-hidden="true">
+    <div class="top"><i></i><i></i><i></i></div>
+    <div class="ex">Exemplo ilustrativo de acompanhamento</div>
+    <div class="st"><span class="dot"></span>Chamado recebido<b>✓</b></div>
+    <div class="st"><span class="dot"></span>Diagnóstico e orçamento<b>✓</b></div>
+    <div class="st on"><span class="dot"></span>Em andamento<b>agora</b></div>
+    <div class="st"><span class="dot"></span>Concluído</div>
+  </div>
 </section>
-<div class="cards" id="cards-servicos"></div>
+<div class="mark" aria-hidden="true"><div>
+  <span>Manutenção de PC</span><span>Celulares</span><span>Suporte técnico</span><span>Criação de sites</span><span>Manutenção preventiva</span>
+  <span>Manutenção de PC</span><span>Celulares</span><span>Suporte técnico</span><span>Criação de sites</span><span>Manutenção preventiva</span>
+</div></div>
+<section class="sec reveal"><div class="sec-h"><span class="badge">Serviços</span><h2>Tudo o que sua tecnologia precisa.</h2></div><div class="bento" id="cards-servicos"></div></section>
+<section class="sec reveal"><div class="sec-h"><span class="badge">Como funciona</span><h2>Do problema à solução, sem complicação.</h2></div>
+  <div class="steps">
+    <div class="card"><h3>Crie sua conta</h3><p>Cadastro rápido e seguro, com seus dados protegidos.</p></div>
+    <div class="card"><h3>Abra um chamado</h3><p>Descreva o problema ou o site que quer, com fotos se precisar.</p></div>
+    <div class="card"><h3>Converse com a gente</h3><p>Tire dúvidas pelo chat do site e aprove o orçamento.</p></div>
+    <div class="card"><h3>Acompanhe</h3><p>Veja o status, a solução e os vídeos do serviço no seu painel.</p></div>
+  </div></section>
+<section class="sec reveal"><div class="card" style="display:flex;gap:24px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+  <div style="max-width:620px"><span class="badge">Novo</span><h2>Evite o defeito antes que ele aconteça.</h2><p>Explore um computador em 3D e veja o que a manutenção preventiva e a detectiva fazem em cada componente.</p></div>
+  <a class="btn primary" href="manutencao.html">Explorar o PC em 3D →</a></div></section>
+<div class="cta reveal"><div><h2>Pronto para resolver?</h2><p>Crie sua conta e abra seu primeiro chamado em poucos minutos.</p></div><a class="btn" href="criar-conta.html">Começar agora →</a></div>
 </main>
 <footer id="site-footer"></footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>

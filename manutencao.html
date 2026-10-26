@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#07090b">
+<title>Manutenção preventiva e detectiva — TechEmpire</title>
+<meta name="description" content="Entenda a manutenção preventiva e detectiva e explore um PC em 3D.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="manutencao" data-auth="public">
+<header id="site-header"></header>
+<main class="wrap-main">
+<section class="hero solo"><div><span class="badge">Manutenção preventiva e detectiva</span>
+  <h1>Evite o defeito antes que ele <em>aconteça.</em></h1>
+  <p class="lead">A maioria das falhas de um computador avisa antes de acontecer. Com cuidados regulares e testes certos, você ganha desempenho, segurança e anos de vida útil.</p>
+  <div class="row" style="margin-top:28px"><a class="btn primary" href="novo-chamado.html?tipo=manutencao">Agendar uma revisão →</a><a class="btn" href="#lab">Explorar o PC em 3D</a></div></div></section>
+
+<section class="sec" id="lab"><div class="sec-h"><span class="badge">Interativo</span><h2>Gire, clique e descubra.</h2><p class="sub">Arraste o computador para girar. Clique nos pontos verdes ou escolha um componente na lista.</p></div>
+  <div class="lab">
+    <div class="stage" id="stage" role="img" aria-label="Computador em 3D que pode ser girado com o mouse ou o dedo"><span class="hint">↔ Arraste para girar</span></div>
+    <div><div class="parts" id="parts"></div><div class="box info" id="info"></div></div>
+  </div></section>
+
+<section class="sec reveal"><div class="sec-h"><span class="badge">Entenda a diferença</span><h2>Duas formas de cuidar do seu equipamento.</h2></div>
+  <div class="cards">
+    <div class="card"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div><h3>Preventiva</h3><p>Ações programadas para evitar que o problema surja: limpeza de poeira, troca de pasta térmica, atualizações, backup e conferência de cabos e conexões.</p></div>
+    <div class="card"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M11 8v3l2 1"/></svg></div><h3>Detectiva</h3><p>Inspeções e testes que descobrem falhas escondidas ou em início: temperatura sob carga, saúde do disco, teste de memória e medição da fonte.</p></div>
+  </div></section>
+
+<section class="sec reveal"><div class="sec-h"><span class="badge">Quando fazer</span><h2>Uma rotina simples.</h2><p class="sub">Referências gerais. O intervalo ideal depende do ambiente e do uso do equipamento.</p></div>
+  <div class="when">
+    <div class="card"><b>Todo mês</b><p>Backup dos arquivos importantes e atualizações do sistema e dos drivers.</p></div>
+    <div class="card"><b>3 a 6 meses</b><p>Limpeza da poeira, conferência das ventoinhas e dos filtros de ar.</p></div>
+    <div class="card"><b>1 a 2 anos</b><p>Troca da pasta térmica e revisão geral com testes de memória, disco e fonte.</p></div>
+  </div></section>
+
+<div class="cta reveal"><div><h2>Quer uma revisão completa?</h2><p>Abra um chamado e combinamos o melhor atendimento para você.</p></div><a class="btn" href="novo-chamado.html?tipo=manutencao">Agendar agora →</a></div>
+</main>
+<footer id="site-footer"></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
+<script src="data.js"></script>
+<script src="script.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="manutencao.js"></script>
+</body>
+</html>

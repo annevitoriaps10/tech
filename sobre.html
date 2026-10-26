@@ -3,23 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#07090b">
 <title>Sobre — TechEmpire</title>
+<meta name="description" content="Conheça a TechEmpire, empresa júnior de TI.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body data-page="sobre" data-auth="public">
 <header id="site-header"></header>
 <main class="wrap-main">
-<h2>Sobre a TechEmpire</h2>
-<p class="lead">Somos uma empresa júnior de TI focada em manutenção de dispositivos, suporte técnico e desenvolvimento de sites.</p>
-<div class="cards">
-  <div class="card"><h3>Transparência</h3><p>Você acompanha cada etapa do atendimento, do orçamento à solução, direto no seu painel.</p></div>
-  <div class="card"><h3>Preço justo</h3><p>Orçamento claro antes de qualquer cobrança. Nada de surpresas.</p></div>
-  <div class="card"><h3>Seus dados protegidos</h3><p>Acesso restrito e tratamento de dados conforme a LGPD. Você só vê o que é seu.</p></div>
+<section class="hero solo"><div><span class="badge">Sobre nós</span><h1 style="font-size:clamp(38px,6vw,64px)">Uma empresa júnior de TI com <em>cara de gente.</em></h1><p class="lead">A TechEmpire cuida de manutenção de dispositivos, suporte técnico e desenvolvimento de sites, com transparência do primeiro contato à entrega.</p></div></section>
+<div class="cards reveal">
+  <div class="card"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/></svg></div><h3>Transparência</h3><p>Você acompanha cada etapa do atendimento, do orçamento à solução, direto no painel.</p></div>
+  <div class="card"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><h3>Preço justo</h3><p>Orçamento claro antes de qualquer cobrança. Sem surpresas no final.</p></div>
+  <div class="card"><div class="ic"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><h3>Dados protegidos</h3><p>Acesso restrito e tratamento conforme a LGPD. Você só vê o que é seu.</p></div>
 </div>
-<p><a class="btn primary" href="contato.html">Fale com a gente</a></p>
+<div class="cta reveal"><div><h2>Vamos conversar?</h2><p>Conte o que você precisa.</p></div><a class="btn" href="contato.html">Entrar em contato →</a></div>
 </main>
 <footer id="site-footer"></footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
